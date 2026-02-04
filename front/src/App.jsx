@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import Home from './pages/Home';
@@ -11,9 +10,9 @@ function App() {
       <div className="App">
         <header className="App-header-mini">
              <nav>
-                 <Link to="/" style={{ color: 'white', marginRight: '15px' }}>Accueil</Link>
-                 <Link to="/quizz" style={{ color: 'white', marginRight: '15px' }}>Quizz</Link>
-                 <Link to="/apprendre" style={{ color: 'white' }}>Apprendre</Link>
+                 <Link to="/" style={{ color: 'black', marginRight: '15px' }}>Accueil</Link>
+                 <Link to="/quizz" style={{ color: 'black', marginRight: '15px' }}>Quizz</Link>
+                 <Link to="/apprendre" style={{ color: 'black' }}>Apprendre</Link>
              </nav>
         </header>
 
