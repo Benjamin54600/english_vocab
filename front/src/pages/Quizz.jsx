@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getRandomWord, updateWordNote } from '../services/api';
+import WordEditor from '../components/WordEditor';
 
 function Quizz() {
   const [currentWord, setCurrentWord] = useState(null);
@@ -27,6 +28,35 @@ function Quizz() {
     fetchNewWord();
   }, []);
 
+  // Gestion des raccourcis clavier
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+        // Ignorer si on n'est pas en mode résultat (donc on tape dans l'input)
+        if (!showResult) return;
+
+        // Enter : Si juste => Continuer. Si faux => Note 1 et continuer
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (isCorrect) {
+                fetchNewWord();
+            } else {
+                handleManualNoteUpdate(1);
+            }
+        }
+        // Touches 1 et 2 uniquement si réponse fausse
+        else if (!isCorrect) {
+            if (e.key === '1' || e.key === '&') { // '&' est souvent la touche 1 sur clavier AZERTY
+                handleManualNoteUpdate(1);
+            } else if (e.key === '2' || e.key === 'é') { // 'é' est souvent la touche 2 sur clavier AZERTY
+                 handleManualNoteUpdate(2);
+            }
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showResult, isCorrect, currentWord]); 
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!currentWord) return;
@@ -47,12 +77,16 @@ function Quizz() {
       }
   };
 
+  const handleWordUpdated = (updatedWord) => {
+    setCurrentWord(updatedWord);
+  };
+
   if (loading) return <div className="flex justify-center items-center h-screen text-xl">Chargement...</div>;
   if (!currentWord) return <div className="flex justify-center items-center h-screen text-xl text-red-500">Erreur de chargement.</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="py-8 px-4">
         {/* Titre */}
         <h1 className="text-6xl font-extrabold text-center mb-16 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
           🎯 Quizz
@@ -61,9 +95,9 @@ function Quizz() {
         {!showResult ? (
           <div className="bg-white rounded-3xl shadow-xl p-10 border border-gray-100">
             {/* Mot à deviner avec drapeau sur la même ligne */}
-            <div className="">
-              <span className="text-5xl">🇫🇷</span>
-              <h2 className="text-55xl tracking-tight">
+            <div className="text-center mb-8">
+              <span className="text-5xl block mb-4">🇫🇷</span>
+              <h2 className="text-5xl font-bold tracking-tight text-gray-900">
                 {currentWord.word_fr}
               </h2>
             </div>
@@ -117,7 +151,7 @@ function Quizz() {
             
             {/* Boutons de notation - uniquement si incorrect */}
             {!isCorrect && (
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 <button 
                   onClick={() => handleManualNoteUpdate(1)}
                   className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md"
@@ -130,24 +164,24 @@ function Quizz() {
                 >
                   2
                 </button>
-                <button 
-                  onClick={() => handleManualNoteUpdate(3)}
-                  className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md"
-                >
-                  3
-                </button>
               </div>
             )}
 
             {/* Bouton suivant */}
-            <button 
+            {isCorrect && <button 
               onClick={fetchNewWord}
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-lg font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
             >
-              {isCorrect ? "Continuer →" : "Passer au suivant →"}
-            </button>
+              Continuer
+            </button>}
           </div>
         )}
+        
+        {/* Composant d'édition (temporaire) */}
+        {showResult && <WordEditor 
+            currentWord={currentWord} 
+            onWordUpdated={handleWordUpdated} 
+        />}
       </div>
     </div>
   );

@@ -87,7 +87,14 @@ def main():
             """
             
             count = 0
-            for row in reader:
+            # Indice de départ (0-based pour le DictReader). 
+            # Si on veut commencer à la ligne 2503 du fichier (mot n°2502), on doit sauter les 2501 premiers mots.
+            start_index = 2501 
+
+            for i, row in enumerate(reader):
+                if i < start_index:
+                    continue
+
                 word_en = row['Word']
                 
                 # On ignore les mots vides ou trop courts si nécessaire
